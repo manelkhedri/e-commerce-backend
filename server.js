@@ -1,17 +1,43 @@
 
+require('dotenv').config();
+
 const express = require('express');
 
+const rateLimit = require('express-rate-limit');
+
 const cors = require('cors');
+
+const authRoutes = require('./routes/authRoutes');
+
+const passport = require('passport');
+
+const configurePassport = require('./config/passport');
 
 const connectDB = require('./db');
 
 const Product = require('./models/Product');
 
+const authMiddleware = require('./middleware/authMiddleware');
+
 // Create an Express application
 const app = express();
 
-app.use(express.json());
+// General rate limiter
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    message: 'Too many requests. Please try again later.'
+  }
+});
+
 app.use(cors());
+app.use(express.json());
+app.use(generalLimiter);
+app.use(passport.initialize());
+configurePassport(passport);
+
+app.use('/api/auth', authRoutes);
 
 // Define the server port
 const PORT = 3000;
@@ -66,7 +92,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // Add a new product to MongoDB
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', authMiddleware, async (req, res) => {
   try {
     const newProduct = await Product.create(req.body);
 
@@ -84,7 +110,7 @@ app.post('/api/products', async (req, res) => {
 });
 
 // Update an existing product in MongoDB
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', authMiddleware, async (req, res) => {
   try {
     const productId = req.params.id;
 
@@ -124,7 +150,7 @@ app.put('/api/products/:id', async (req, res) => {
 });
 
 // Delete a product from MongoDB
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authMiddleware, async (req, res) => {
   try {
     const productId = req.params.id;
 
