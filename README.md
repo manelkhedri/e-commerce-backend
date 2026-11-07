@@ -2,9 +2,9 @@
 
 ## 1. Student Information
 
-**Student Name:** KHEDRI Manel 
-**Project Name:** GOLDEN HANDS  
-**Project Part:** Backend
+### **Student Name:** KHEDRI Manel 
+### **Project Name:** GOLDEN HANDS  
+### **Project Part:** Backend
 
 ## 2. Application Description
 
